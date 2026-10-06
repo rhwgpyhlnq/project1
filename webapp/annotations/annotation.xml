@@ -13,6 +13,48 @@
     </edmx:Reference>
     <edmx:DataServices>
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="local">
+        <Annotations Target="SAP__self.RunsType"><ns0:Annotation xmlns:ns0="http://docs.oasis-open.org/odata/ns/edm" Term="UI.LineItem">
+                    <ns0:Collection>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="CompanyCode" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="FiscalYear" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="FiscalPeriod" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="WBS" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="GLAccount" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="TotalAmount" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="DebitCreditCode" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="CarryType" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="ReceiverAccount" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="TransferAccount" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Criticality" Path="Criticality" />
+                            <ns0:PropertyValue Property="Value" Path="Status" />
+                        </ns0:Record>
+                        <ns0:Record Type="UI.DataField">
+                            <ns0:PropertyValue Property="Value" Path="Message" />
+                        </ns0:Record>
+                        </ns0:Collection>
+                </ns0:Annotation>
+                </Annotations>
         </Schema>
     </edmx:DataServices>
 </edmx:Edmx>

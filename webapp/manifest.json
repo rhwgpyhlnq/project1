@@ -5,7 +5,7 @@
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
-      "version": "0.0.1"
+      "version": "0.0.3"
     },
     "title": "{{appTitle}}",
     "description": "{{appDescription}}",
@@ -32,6 +32,19 @@
           ],
           "localUri": "localService/mainService/metadata.xml",
           "odataVersion": "4.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "project1-tile": {
+          "semanticObject": "project1",
+          "action": "tile",
+          "title": "{{appTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
         }
       }
     }
@@ -129,6 +142,13 @@
                 "@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
                     "type": "GridTable"
+                  },
+                  "actions": {
+                    "SimulationPreview": {
+                      "text": "{i18n>previewAction}",
+                      "press": "project1.ext.Simulation.open",
+                      "requiresSelection": true
+                    }
                   }
                 }
               }

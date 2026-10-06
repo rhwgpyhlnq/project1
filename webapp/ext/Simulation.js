@@ -1,0 +1,75 @@
+sap.ui.define([
+    "sap/ui/core/Fragment", "sap/ui/model/json/JSONModel", "sap/m/MessageBox",
+    "sap/ui/model/Filter", "sap/ui/model/FilterOperator", "project1/ext/Totals"
+], function (Fragment, JSONModel, MessageBox, Filter, FilterOperator, Totals) {
+    "use strict";
+    return {
+        open: async function (bindingContext, selectedContexts) {
+            const view = this.getView();
+            if (view.data("simulationBusy")) { return; }
+            const bundle = await view.getModel("i18n").getResourceBundle();
+            const contexts = selectedContexts || [];
+            if (!contexts.length) { MessageBox.information(bundle.getText("previewSelect")); return; }
+            const unique = new Map();
+            contexts.forEach(function (context) {
+                const row = context.getObject();
+                unique.set(JSON.stringify([row.CompanyCode, row.FiscalYear, row.FiscalPeriod,
+                    row.Ledger, row.WBS, row.Currency]), context);
+            });
+            const model = contexts[0].getModel();
+            const results = [];
+            view.data("simulationBusy", true);
+            view.setBusy(true);
+            try {
+                for (const context of unique.values()) {
+                    const action = model.bindContext("com.sap.gateway.srvd.zui_pc_sim.v0001.Simulate(...)", context);
+                    let items;
+                    try {
+                        await action.invoke("$direct");
+                        const result = await action.getBoundContext().requestObject();
+                        if (!result || !result.RunId) { throw new Error(bundle.getText("previewNoResult")); }
+                        items = model.bindList("/Items", undefined, undefined,
+                            new Filter("RunId", FilterOperator.EQ, result.RunId), { $$groupId: "$direct" });
+                        const lines = [];
+                        // Read every page: do not silently truncate a large voucher.
+                        let offset = 0;
+                        while (true) {
+                            const page = await items.requestContexts(offset, 100);
+                            lines.push(...page.map(function (item) { return item.getObject(); }));
+                            offset += page.length;
+                            if (page.length < 100) { break; }
+                        }
+                        lines.sort(function (a, b) { return Number(a.ItemNo) - Number(b.ItemNo); });
+                        results.push(Object.assign({}, result, {
+                            Lines: lines, Totals: Totals.calculate(lines),
+                            MessageType: result.Status === "E" ? "Error" : result.Status === "Z" ? "Warning" : "Success"
+                        }));
+                    } catch (error) {
+                        const row = context.getObject();
+                        results.push(Object.assign({}, row, { Message: error.message,
+                            MessageType: "Error", Lines: [], Totals: [] }));
+                    } finally {
+                        if (items) { items.destroy(); }
+                        action.destroy();
+                    }
+                }
+                let dialog;
+                dialog = await Fragment.load({
+                    name: "project1.ext.VoucherPreview", type: "XML",
+                    controller: { close: function () { dialog.close(); } }
+                });
+                view.addDependent(dialog);
+                const preview = new JSONModel({ Results: results });
+                preview.setSizeLimit(Math.max(1000, ...results.map(function (r) { return r.Lines.length; })));
+                dialog.setModel(preview, "preview");
+                dialog.attachAfterClose(function () { dialog.destroy(); preview.destroy(); });
+                dialog.open();
+            } catch (error) {
+                MessageBox.error(error.message);
+            } finally {
+                view.setBusy(false);
+                view.data("simulationBusy", false);
+            }
+        }
+    };
+});
