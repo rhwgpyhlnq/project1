@@ -1,13 +1,15 @@
 sap.ui.define([
-    "sap/ui/core/Fragment", "sap/ui/model/json/JSONModel", "sap/m/MessageBox",
+    "sap/ui/core/BusyIndicator", "sap/ui/model/json/JSONModel", "sap/m/MessageBox",
     "sap/ui/model/Filter", "sap/ui/model/FilterOperator", "project1/ext/Totals"
-], function (Fragment, JSONModel, MessageBox, Filter, FilterOperator, Totals) {
+], function (BusyIndicator, JSONModel, MessageBox, Filter, FilterOperator, Totals) {
     "use strict";
+    const pending = new WeakSet();
     return {
         open: async function (bindingContext, selectedContexts) {
-            const view = this.getView();
-            if (view.data("simulationBusy")) { return; }
-            const bundle = await view.getModel("i18n").getResourceBundle();
+            // FPM binds manifest action handlers to ExtensionAPI, not Controller.
+            const api = this;
+            if (pending.has(api)) { return; }
+            const bundle = await api.getModel("i18n").getResourceBundle();
             const contexts = selectedContexts || [];
             if (!contexts.length) { MessageBox.information(bundle.getText("previewSelect")); return; }
             const unique = new Map();
@@ -18,8 +20,8 @@ sap.ui.define([
             });
             const model = contexts[0].getModel();
             const results = [];
-            view.data("simulationBusy", true);
-            view.setBusy(true);
+            pending.add(api);
+            BusyIndicator.show(0);
             try {
                 for (const context of unique.values()) {
                     const action = model.bindContext("com.sap.gateway.srvd.zui_pc_sim.v0001.Simulate(...)", context);
@@ -54,11 +56,10 @@ sap.ui.define([
                     }
                 }
                 let dialog;
-                dialog = await Fragment.load({
+                dialog = await api.loadFragment({
                     name: "project1.ext.VoucherPreview", type: "XML",
                     controller: { close: function () { dialog.close(); } }
                 });
-                view.addDependent(dialog);
                 const preview = new JSONModel({ Results: results });
                 preview.setSizeLimit(Math.max(1000, ...results.map(function (r) { return r.Lines.length; })));
                 dialog.setModel(preview, "preview");
@@ -67,8 +68,8 @@ sap.ui.define([
             } catch (error) {
                 MessageBox.error(error.message);
             } finally {
-                view.setBusy(false);
-                view.data("simulationBusy", false);
+                BusyIndicator.hide();
+                pending.delete(api);
             }
         }
     };

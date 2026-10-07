@@ -37,19 +37,19 @@ test('invokes once per WBS/period, reads all items and clears busy state', async
     const dialog = { setModel: (m) => { captured = m.data; }, attachAfterClose: () => {}, open: () => {} };
     class JSONModel { constructor(data) { this.data = data; } setSizeLimit() {} }
     class Filter {}
-    const module = load('webapp/ext/Simulation.js', [{ load: async () => dialog }, JSONModel,
+    const module = load('webapp/ext/Simulation.js', [{ show: () => { busy = true; }, hide: () => { busy = false; } }, JSONModel,
         { error: (message) => { throw new Error(message); } }, Filter, { EQ: 'EQ' }, totals]);
-    const storage = {};
-    const view = { data: (key, value) => value === undefined ? storage[key] : (storage[key] = value),
-        getModel: () => ({ getResourceBundle: async () => ({ getText: (key) => key }) }),
-        setBusy: (value) => { busy = value; }, addDependent: () => {} };
+    // Match the actual FE callback receiver: deliberately no getView method.
+    const api = { getModel: () => ({ getResourceBundle: async () => ({ getText: (key) => key }) }),
+        loadFragment: async () => dialog };
     const context = { getObject: () => ({ CompanyCode: '1310', FiscalYear: '2026', FiscalPeriod: '003',
         Ledger: '0L', WBS: 'ECU99-05', Currency: 'CNY' }), getModel: () => model };
-    await module.open.call({ getView: () => view }, undefined, [context, context]);
+    await module.open.call(api, undefined, [context, context]);
     assert.equal(calls, 1);
     assert.equal(captured.Results[0].Lines.length, 100);
     assert.equal(captured.Results[0].Totals[0].Debit, '50.00');
     assert.equal(destroyed, 2);
     assert.equal(busy, false);
-    assert.equal(storage.simulationBusy, false);
+    await module.open.call(api, undefined, [context]);
+    assert.equal(calls, 2, 'Can simulate again after the first invocation');
 });
