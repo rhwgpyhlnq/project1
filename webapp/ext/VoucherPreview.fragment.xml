@@ -10,7 +10,6 @@
                             <MessageStrip text="{preview>Message}" type="{preview>MessageType}" showIcon="true"/>
                             <Table items="{preview>Lines}" noDataText="{i18n>previewEmpty}" sticky="ColumnHeaders">
                                 <columns>
-                                    <Column><Text text="{i18n>previewSource}"/></Column>
                                     <Column><Text text="{i18n>previewAccount}"/></Column>
                                     <Column><Text text="{i18n>previewDC}"/></Column>
                                     <Column hAlign="End"><Text text="{i18n>previewAmount}"/></Column>
@@ -21,7 +20,6 @@
                                 </columns>
                                 <items>
                                     <ColumnListItem><cells>
-                                        <Text text="{preview>SourceAccount}"/>
                                         <Text text="{preview>GLAccount}"/>
                                         <Text text="{preview>DebitCredit}"/>
                                         <ObjectNumber number="{preview>Amount}" unit="{preview>Currency}"/>

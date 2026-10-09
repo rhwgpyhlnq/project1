@@ -3,9 +3,15 @@
   "sap.app": {
     "id": "project1",
     "type": "application",
-    "i18n": "i18n/i18n.properties",
+    "i18n": {
+      "bundleUrl": "i18n/i18n.properties",
+      "supportedLocales": [
+        "",
+        "en"
+      ]
+    },
     "applicationVersion": {
-      "version": "0.0.3"
+      "version": "0.0.8"
     },
     "title": "{{appTitle}}",
     "description": "{{appDescription}}",
@@ -83,7 +89,11 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "project1.i18n.i18n"
+          "bundleName": "project1.i18n.i18n",
+          "supportedLocales": [
+            "",
+            "en"
+          ]
         }
       },
       "": {
@@ -97,7 +107,13 @@
       },
       "@i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
-        "uri": "i18n/i18n.properties"
+        "uri": "i18n/i18n.properties",
+        "settings": {
+          "supportedLocales": [
+            "",
+            "en"
+          ]
+        }
       }
     },
     "resources": {
@@ -115,11 +131,6 @@
           "pattern": "Runs({key}):?query:",
           "name": "RunsObjectPage",
           "target": "RunsObjectPage"
-        },
-        {
-          "pattern": "Runs({key})/_Simulations({key2}):?query:",
-          "name": "SimulationsObjectPage",
-          "target": "SimulationsObjectPage"
         }
       ],
       "targets": {
@@ -162,30 +173,13 @@
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/Runs",
-              "navigation": {
-                "_Simulations": {
-                  "detail": {
-                    "route": "SimulationsObjectPage"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "SimulationsObjectPage": {
-          "type": "Component",
-          "id": "SimulationsObjectPage",
-          "name": "sap.fe.templates.ObjectPage",
-          "options": {
-            "settings": {
-              "editableHeaderContent": false,
-              "contextPath": "/Runs/_Simulations"
+              "contextPath": "/Runs"
             }
           }
         }
       }
-    }
+    },
+    "flexBundle": false
   },
   "sap.fiori": {
     "registrationIds": [],

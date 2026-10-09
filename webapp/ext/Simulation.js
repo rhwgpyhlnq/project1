@@ -1,7 +1,7 @@
 sap.ui.define([
     "sap/ui/core/BusyIndicator", "sap/ui/model/json/JSONModel", "sap/m/MessageBox",
-    "sap/ui/model/Filter", "sap/ui/model/FilterOperator", "project1/ext/Totals"
-], function (BusyIndicator, JSONModel, MessageBox, Filter, FilterOperator, Totals) {
+    "project1/ext/Totals"
+], function (BusyIndicator, JSONModel, MessageBox, Totals) {
     "use strict";
     const pending = new WeakSet();
     return {
@@ -25,22 +25,14 @@ sap.ui.define([
             try {
                 for (const context of unique.values()) {
                     const action = model.bindContext("com.sap.gateway.srvd.zui_pc_sim.v0001.Simulate(...)", context);
-                    let items;
                     try {
                         await action.invoke("$direct");
                         const result = await action.getBoundContext().requestObject();
-                        if (!result || !result.RunId) { throw new Error(bundle.getText("previewNoResult")); }
-                        items = model.bindList("/Items", undefined, undefined,
-                            new Filter("RunId", FilterOperator.EQ, result.RunId), { $$groupId: "$direct" });
-                        const lines = [];
-                        // Read every page: do not silently truncate a large voucher.
-                        let offset = 0;
-                        while (true) {
-                            const page = await items.requestContexts(offset, 100);
-                            lines.push(...page.map(function (item) { return item.getObject(); }));
-                            offset += page.length;
-                            if (page.length < 100) { break; }
+                        if (!result) { throw new Error(bundle.getText("previewNoResult")); }
+                        if (!Array.isArray(result._Lines)) {
+                            throw new Error(bundle.getText("previewNoResult"));
                         }
+                        const lines = result._Lines.slice();
                         lines.sort(function (a, b) { return Number(a.ItemNo) - Number(b.ItemNo); });
                         results.push(Object.assign({}, result, {
                             Lines: lines, Totals: Totals.calculate(lines),
@@ -51,7 +43,6 @@ sap.ui.define([
                         results.push(Object.assign({}, row, { Message: error.message,
                             MessageType: "Error", Lines: [], Totals: [] }));
                     } finally {
-                        if (items) { items.destroy(); }
                         action.destroy();
                     }
                 }

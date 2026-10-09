@@ -24,21 +24,21 @@ test('sums decimal amounts exactly and keeps currencies separate', () => {
     assert.equal(result[1].Balanced, false);
     assert.throws(() => totals.calculate([{ Currency: 'CNY', DebitCredit: 'X', Amount: '1' }]));
 });
-test('invokes once per WBS/period, reads all items and clears busy state', async () => {
+test('invokes once per WBS/period, displays deep preview lines and clears busy state', async () => {
     let calls = 0, destroyed = 0, captured, busy;
     const model = {
         bindContext: () => ({ invoke: async () => { calls++; },
-            getBoundContext: () => ({ requestObject: async () => ({ RunId: 'id', Status: 'S', Message: 'OK' }) }),
+            getBoundContext: () => ({ requestObject: async () => ({ Status: 'S', Message: 'OK',
+                _Lines: Array.from({ length: 100 }, (_, i) => ({
+                    ItemNo: String(i), Currency: 'CNY', DebitCredit: i % 2 ? 'S' : 'H', Amount: '1'
+                })) }) }),
             destroy: () => { destroyed++; } }),
-        bindList: () => ({ requestContexts: async (offset) => offset === 0 ? Array.from({ length: 100 }, (_, i) => ({
-            getObject: () => ({ ItemNo: String(i), Currency: 'CNY', DebitCredit: i % 2 ? 'S' : 'H', Amount: '1' })
-        })) : [], destroy: () => { destroyed++; } })
+        bindList: () => { throw new Error('Simulation must not read persisted history'); }
     };
     const dialog = { setModel: (m) => { captured = m.data; }, attachAfterClose: () => {}, open: () => {} };
     class JSONModel { constructor(data) { this.data = data; } setSizeLimit() {} }
-    class Filter {}
     const module = load('webapp/ext/Simulation.js', [{ show: () => { busy = true; }, hide: () => { busy = false; } }, JSONModel,
-        { error: (message) => { throw new Error(message); } }, Filter, { EQ: 'EQ' }, totals]);
+        { error: (message) => { throw new Error(message); } }, totals]);
     // Match the actual FE callback receiver: deliberately no getView method.
     const api = { getModel: () => ({ getResourceBundle: async () => ({ getText: (key) => key }) }),
         loadFragment: async () => dialog };
@@ -48,7 +48,7 @@ test('invokes once per WBS/period, reads all items and clears busy state', async
     assert.equal(calls, 1);
     assert.equal(captured.Results[0].Lines.length, 100);
     assert.equal(captured.Results[0].Totals[0].Debit, '50.00');
-    assert.equal(destroyed, 2);
+    assert.equal(destroyed, 1);
     assert.equal(busy, false);
     await module.open.call(api, undefined, [context]);
     assert.equal(calls, 2, 'Can simulate again after the first invocation');

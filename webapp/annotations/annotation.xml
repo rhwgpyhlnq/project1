@@ -15,6 +15,17 @@
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="local">
         <Annotations Target="SAP__self.RunsType"><ns0:Annotation xmlns:ns0="http://docs.oasis-open.org/odata/ns/edm" Term="UI.LineItem">
                     <ns0:Collection>
+<ns0:Record Type="UI.DataFieldForAction">
+ <ns0:PropertyValue Property="Label" String="Offset voucher（冲销）" />
+ <ns0:PropertyValue Property="Action" String="com.sap.gateway.srvd.zui_pc_sim.v0001.OffsetVoucher" />
+ <ns0:PropertyValue Property="InvocationGrouping" EnumMember="UI.OperationGroupingType/ChangeSet" />
+</ns0:Record>
+<ns0:Record Type="UI.DataFieldForAction">
+ <ns0:PropertyValue Property="Label" String="Posting voucher（创建）" />
+ <ns0:PropertyValue Property="Action" String="com.sap.gateway.srvd.zui_pc_sim.v0001.Posting" />
+ <ns0:PropertyValue Property="InvocationGrouping" EnumMember="UI.OperationGroupingType/ChangeSet" />
+</ns0:Record>
+
                         <ns0:Record Type="UI.DataField">
                             <ns0:PropertyValue Property="Value" Path="CompanyCode" />
                         </ns0:Record>
@@ -52,9 +63,18 @@
                         <ns0:Record Type="UI.DataField">
                             <ns0:PropertyValue Property="Value" Path="Message" />
                         </ns0:Record>
+                        <ns0:Record Type="UI.DataField"><ns0:PropertyValue Property="Label" String="过账凭证号"/><ns0:PropertyValue Property="Value" Path="AccountingDocument"/></ns0:Record>
+                        <ns0:Record Type="UI.DataField"><ns0:PropertyValue Property="Label" String="过账日期"/><ns0:PropertyValue Property="Value" Path="PostingDate"/></ns0:Record>
                         </ns0:Collection>
                 </ns0:Annotation>
                 </Annotations>
-        </Schema>
+        <Annotations Target="SAP__self.Posting(SAP__self.RunsType)"><Annotation Term="Common.SideEffects"><Record Type="Common.SideEffectsType"><PropertyValue Property="TargetEntities"><Collection><NavigationPropertyPath>_it</NavigationPropertyPath></Collection></PropertyValue></Record></Annotation></Annotations>
+        <Annotations Target="SAP__self.Posting(SAP__self.RunsType)/PostingDate"><Annotation Term="Common.FieldControl" EnumMember="Common.FieldControlType/Mandatory"/></Annotations>
+<Annotations Target="SAP__self.Posting(SAP__self.RunsType)/DocumentDate"><Annotation Term="Common.FieldControl" EnumMember="Common.FieldControlType/Mandatory"/></Annotations>
+<Annotations Target="SAP__self.Posting(SAP__self.RunsType)/AccountingDocumentType"><Annotation Term="Common.FieldControl" EnumMember="Common.FieldControlType/Mandatory"/><Annotation Term="UI.ParameterDefaultValue" String="SA"/></Annotations>
+<Annotations Target="SAP__self.OffsetVoucher(SAP__self.RunsType)"><Annotation Term="Common.SideEffects"><Record Type="Common.SideEffectsType"><PropertyValue Property="TargetEntities"><Collection><NavigationPropertyPath>_it</NavigationPropertyPath></Collection></PropertyValue></Record></Annotation></Annotations>
+<Annotations Target="SAP__self.OffsetVoucher(SAP__self.RunsType)/PostingDate"><Annotation Term="Common.FieldControl" EnumMember="Common.FieldControlType/Mandatory"/></Annotations>
+<Annotations Target="SAP__self.OffsetVoucher(SAP__self.RunsType)/ReversalReason"><Annotation Term="Common.FieldControl" EnumMember="Common.FieldControlType/Mandatory"/></Annotations>
+</Schema>
     </edmx:DataServices>
 </edmx:Edmx>
